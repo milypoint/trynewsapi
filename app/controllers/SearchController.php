@@ -11,12 +11,10 @@ class SearchController extends Controller
 	public function action()
 	{
 		// make request:
+		$result = [];
 		if (!empty($_GET)) {
 			$request = new ApiRequestEverything($_GET);
 			$result = $request->request();
-
-		} else {
-			$result = [];
 		}
 		// make view:
 		$view = new SearchView(array_merge($_GET, $result));
