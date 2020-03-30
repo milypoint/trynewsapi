@@ -12,10 +12,17 @@ class Config
 			//try to read token from config
 			$content = file_get_contents(self::$_file);
 			$content = json_decode($content);
-			if (isset($content->token)) {
-				return $content->token;
+			try {
+				if (isset($content->token)) {
+					return $content->token;
+				} else {
+					throw new \Exception('Token not found in' . self::$_file);
+				}
+			} catch (\Exception $e) {
+				echo $e->getMessage();
 			}
-			throw new \Exception('Token not found in' . self::$_file);
+
+
 		} else {
 			// create config file
 			$handle = fopen(self::$_file, 'w') or die('Cannot create file:  ' . self::$_file);
