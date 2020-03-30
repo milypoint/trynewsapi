@@ -7,14 +7,13 @@
 <body>
 <div>
 	<form method="get" action="">
-		<input type="text" name="q" value="<?echo (isset($q)) ?
-			$q :
-			'';?>">
+		<input type="text" name="q" value="<?echo (isset($q)) ?	$q : '';?>">
 		Language
 		<select name="language">
+			<option disabled selected value>Language</option>
 			<?if (isset($languages)):?>
 				<?foreach ($languages as $_language):?>
-					<option <?echo ($_language === $language)?'selected':'';?> value="<?echo $_language?>"><?echo $_language?></option>
+					<option <?echo ($_language == $language)?'selected':'';?> value="<?echo $_language?>"><?echo $_language?></option>
 				<?endforeach;?>
 			<?else:?>
 				<option value="ua">Українська</option>

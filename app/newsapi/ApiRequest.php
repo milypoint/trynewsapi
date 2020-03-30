@@ -10,8 +10,6 @@ abstract class ApiRequest extends ClassWithAttributes
     protected $apiKey;
     protected $apiUrl = 'http://newsapi.org';
 
-    public $errors;
-
     public function __construct(array $params)
     {
 		foreach ($params as $key => $value) {
@@ -23,6 +21,7 @@ abstract class ApiRequest extends ClassWithAttributes
 
     public function request()
     {
+    	//TODO: Add validation $_GET data.
         $string_parameters = [];
         foreach ($this->_attributes as $key => $value) {
         	if (in_array($key, $this->_request_parameters)) {
@@ -33,9 +32,15 @@ abstract class ApiRequest extends ClassWithAttributes
         $url = $this->apiUrl . '?'.implode('&', $string_parameters);
         $headers = ['X-Api-Key: '.$this->apiKey];
         $ch = curl_init();
-        if (!$ch) {
-            die('Curl wont init.');
-        }
+        try {
+			if (!$ch) {
+				throw new \Exception('Curl did not init.');
+			}
+		} catch (\Exception $e) {
+        	echo $e->getMessage();
+        	return [];
+		}
+
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -43,13 +48,18 @@ abstract class ApiRequest extends ClassWithAttributes
 
 		$result = curl_exec($ch);
 		curl_close($ch);
+
 		try {
 			if (!$result) {
+				$result = [];
 				throw new \Exception('Request failed.');
 			} else {
-				$result = json_decode($result);
 				// filter required data:
-				if ($result->status === 'ok') {
+				$result = json_decode($result);
+				if ($result->status == 'ok') {
+					//TODO:  replace $articles to variable of variable witch declared in child class
+					//TODO:  for example: $request_key = 'articles';
+					//TODO:  $$request_key = ['title', 'description', 'url'];
 					$articles = [];
 					foreach ($result->articles as $article) {
 						$_art = [];
@@ -58,19 +68,21 @@ abstract class ApiRequest extends ClassWithAttributes
 						}
 						$articles[] = $_art;
 					}
-					$articles = ['articles' => $articles];
-
-					return $articles;
+					$result = ['articles' => $articles];
 				} else {
-					$this->errors = $result;
-					return [];
+					$err_code = $result->code;
+					$err_message = $result->message;
+					$result = [];
+					throw new \Exception(
+						'Request return error with code: ' . $err_code . PHP_EOL .
+						'Message: ' . $err_message
+					);
 				}
-
 			}
 		} catch (\Exception $e) {
 			echo $e->getMessage();
-			return $result;
 		}
+		return $result;
     }
 
 }
