@@ -23,7 +23,8 @@ class Config
 			$data = json_encode($data);
 			fwrite($handle, $data);
 			fclose($handle);
-			die('Put toke into  ' . self::$_file);
+			echo 'Put toke into  ' . self::$_file;
+			return null;
 		}
 	}
 }

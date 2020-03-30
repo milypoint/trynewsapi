@@ -8,7 +8,7 @@ class ApiRequestEverything extends ApiRequest
 {
     protected $_endpoint = '/v2/everything';
 
-    protected $_default_parameters = [
+    protected $_request_parameters = [
         'q',
         'qInTitle',
         'sources',

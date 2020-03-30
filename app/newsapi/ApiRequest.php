@@ -3,43 +3,35 @@
 
 namespace app\newsapi;
 
-abstract class ApiRequest
+use app\tools\ClassWithAttributes;
+
+abstract class ApiRequest extends ClassWithAttributes
 {
-    protected $apiKey = '15c40ce27080453cb27da1210c38c999';
+    protected $apiKey;
     protected $apiUrl = 'http://newsapi.org';
 
-    protected $_parameters = [];
+    public $errors;
 
-    public function __construct()
+    public function __construct(array $params)
     {
+		foreach ($params as $key => $value) {
+			$this->$key = $value;
+		}
         $this->apiUrl .= $this->_endpoint;
-    }
-
-    public function __set($name, $value)
-    {
-        if (in_array($name,$this->_default_parameters)) {
-            $this->_parameters[$name] = $value;
-        }
-    }
-
-    public function __get($name)
-    {
-        if (isset($name, $this->_parameters)) {
-            return $this->_parameters[$name];
-        }
-        return null;
+        $this->apiKey = Config::token();
     }
 
     public function request()
     {
         $string_parameters = [];
-        foreach ($this->_parameters as $key => $value) {
-            $string_parameters[] = $key.'='.urlencode($value);
+        foreach ($this->_attributes as $key => $value) {
+        	if (in_array($key, $this->_request_parameters)) {
+				$string_parameters[] = $key.'='.urlencode($value);
+			}
         }
         // add parameters into url:
         $url = $this->apiUrl . '?'.implode('&', $string_parameters);
         $headers = ['X-Api-Key: '.$this->apiKey];
-
         $ch = curl_init();
         if (!$ch) {
             die('Curl wont init.');
@@ -47,9 +39,38 @@ abstract class ApiRequest
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        return $result;
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+
+		$result = curl_exec($ch);
+		curl_close($ch);
+		try {
+			if (!$result) {
+				throw new \Exception('Request failed.');
+			} else {
+				$result = json_decode($result);
+				// filter required data:
+				if ($result->status === 'ok') {
+					$articles = [];
+					foreach ($result->articles as $article) {
+						$_art = [];
+						foreach (array('title', 'description', 'url') as $key) {
+							$_art[$key] = $article->$key;
+						}
+						$articles[] = $_art;
+					}
+					$articles = ['articles' => $articles];
+
+					return $articles;
+				} else {
+					$this->errors = $result;
+					return [];
+				}
+
+			}
+		} catch (\Exception $e) {
+			echo $e->getMessage();
+			return $result;
+		}
     }
 
 }

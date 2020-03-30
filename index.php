@@ -1,7 +1,6 @@
 <?php
 
-use app\controllers\IndexController;
-use app\newsapi\Config;
+use app\controllers\SearchController;
 
 define('ROOT', __DIR__);
 
@@ -36,8 +35,5 @@ spl_autoload_register(function ($class) {
 });
 
 
-//$controller = new IndexController();
-//$controller->action();
-
-$cfg = Config::token();
-var_dump($cfg);
+$controller = new SearchController();
+$controller->action();
