@@ -13,7 +13,7 @@ class SearchView extends View
 		foreach ([
 					 '_file' => ROOT . '/app/views/static/search_view.php',
 					 'title' => 'Search News',
-					 'languages' => ['ua', 'ru']
+					 'languages' => ['ar', 'de', 'en', 'es', 'fr', 'he', 'it', 'nl', 'no', 'pt', 'ru', 'se', 'ud', 'zh']
 				 ] as $key => $value) {
 			$this->$key = $value;
 		}

@@ -21,4 +21,15 @@ class ApiRequestEverything extends ApiRequest
         'page'
     ];
 
+    public function rules()
+	{
+		return [
+			'language' => function ($value) {
+				return (in_array($value,
+					['ar', 'de', 'en', 'es', 'fr', 'he', 'it', 'nl', 'no', 'pt', 'ru', 'se', 'ud', 'zh']
+				));
+			},
+		];
+	}
+
 }

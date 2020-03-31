@@ -10,7 +10,24 @@ abstract class ApiRequest extends ClassWithAttributes
     protected $apiKey;
     protected $apiUrl = 'http://newsapi.org';
 
-    public function __construct(array $params)
+    public $errors = [];
+
+    abstract function rules();
+
+    public function __set($key, $value) //extends parent::__set()
+	{
+		foreach ($this->rules() as $k => $fn) {
+			if ($key == $k) {
+				if (!$fn($value)) {
+					$this->errors[$key] = 'The value does not comply with the rules';
+					return;
+				}
+			}
+		}
+		parent::__set($key, $value);
+	}
+
+	public function __construct(array $params)
     {
 		foreach ($params as $key => $value) {
 			$this->$key = $value;
